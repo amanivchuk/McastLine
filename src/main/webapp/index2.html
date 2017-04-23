@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Line Status</title>
+</head>
+<body>
+
+<div>
+    <input type="text" id="message"/>
+    <input value="Send" onclick="sendMessage();" type="button">
+    </hr>
+</div>
+<div>
+    <input type="submit" value="Send message" onclick="send()" />
+</div>
+
+
+    <div id="messages">
+        <!--<textarea readonly="readonly" id="messages" rows="30" cols="60"></textarea>-->
+    </div>
+    <script type="text/javascript">
+        var webSocket = new WebSocket("ws://localhost:8080/McastLine/websocket");
+
+        webSocket.onerror = function (event) {
+            onError(event);
+        };
+
+        webSocket.onopen = function (event) {
+            onOpen(event);
+        };
+
+        webSocket.onmessage = function (event) {
+            onMessage(event);
+        };
+
+        function onMessage(event) {
+            var json = JSON.parse(event.data);
+            document.getElementById('messages').innerHTML
+                = '<br/>Received server response!'
+                + '<br/>Subject: ' +json.hostname
+                + '</br>Content: ' + json.status;
+        }
+
+        function onOpen(event){
+            alert('Connection established');
+        }
+
+        function onError(event){
+            alert('Error');
+        }
+
+        //    обработчик нажатия кнопки отправки сообщения
+        function sendMessage() {
+//        отправляем сообщения на сервер
+            webSocket.send(message.value);
+            message.value += "On server was send:> " + message.value + "\n";
+            message.value = "";
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pretech blog testing web sockets</title>
+</head>
+<body>
+
+<div class="login_div">
+    <p class="title">Добавить линию для контроля</p>
+    <form class="login_form" name="username" action="addLine.jsp" method="post">
+    <!--Login: <input type="text" name="username" value="" size="30">-->
+    <input type="submit" value="Enter">
+    </form>
+</div>
+
+
+<div>
+    <p></p>
+    <input type="text" id="message"/>
+    <input value="Send" onclick="sendMessage();" type="button">
+    </hr>
+</div>
+
+<p id="countLine"></p>
+
+<table class="table" align="center" border="1" width="400" height="200">
+    <caption>Line status.</caption>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Hostname</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th scope="row">1</th>
+        <td><p id="demo"></p></td>
+        <td id="status"><p id="demo1"></p></td>
+    </tr>
+    <tr>
+        <th scope="row">2</th>
+        <td><p id="demo_rez"></p></td>
+        <td id="status1"><p id="demo1_rez"></p></td>
+    </tr>
+    <tr>
+        <th scope="row">3</th>
+        <td><p id="adf"></p></td>
+        <td id="status2"><p id="adf1"></p></td>
+    </tr>
+    </tbody>
+</table>
+
+
+<script type="text/javascript">
+    /*Создаем объект WebSocket и указываем путьь для подключения.
+        Подключение произойдет сразу после создания компонента.*/
+    var webSocket = new WebSocket("ws://localhost:8080/McastLine/websocket");
+    var messages = document.getElementById("messages");
+    var message = document.getElementById("message");
+//    обработчик события открытия соединения с сервером
+    webSocket.onopen = function (message) {
+        //messages.value+="Connection create \n";
+        var json = JSON.parse(message.data);
+        document.getElementById('countLine').innerHTML = json.countLine;
+    }
+//    обработчик события закрытия соединения с сервером
+    webSocket.onclose = function (message) {
+        messages.value += "Connection close \n";
+    }
+//    обработчик ошибки при работе с сокетом
+    webSocket.onerror = function (message) {
+        messages.value += "Error \n";
+    }
+//    обработчик нажатия кнопки отправки сообщения
+    function sendMessage() {
+//        отправляем сообщения на сервер
+        webSocket.send(message.value);
+        message.value += "On server was send:> " + message.value + "\n";
+        message.value = "";
+    }
+//  обработчик получения сообщения от сервера
+    webSocket.onmessage=function (message) {
+       // messages.value+="Message from server: " + message.data + "\n";
+
+        var json = JSON.parse(message.data);
+        if(json.hostname == "MSSR osn"){
+            document.getElementById('demo').innerHTML = json.hostname;
+            document.getElementById('demo1').innerHTML = json.status;
+            if(json.status == true){
+                document.getElementById('status').style.background = "green";
+            }else{
+                document.getElementById('status').style.background="red";
+            }
+        }else if(json.hostname == "ADF"){
+            document.getElementById('adf').innerHTML = json.hostname;
+            document.getElementById('adf1').innerHTML = json.status;
+            if(json.status == true){
+                document.getElementById('status2').style.background = "green";
+            }else{
+                document.getElementById('status2').style.background="red";
+            }
+        }
+        else{
+            document.getElementById('demo_rez').innerHTML = json.hostname;
+            document.getElementById('demo1_rez').innerHTML = json.status;
+            if(json.status == true) {
+                document.getElementById('status1').style.background = "green";
+            }else{
+                document.getElementById('status1').style.background="red";
+            }
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pretech blog testing web sockets</title>
+</head>
+<body>
+
+<div class="login_div">
+    <p class="title">Добавить линию для контроля</p>
+    <form class="login_form" name="username" action="addLine.jsp" method="post">
+        <!--Login: <input type="text" name="username" value="" size="30">-->
+        <input type="submit" value="Enter">
+    </form>
+</div>
+
+
+<div>
+    <p></p>
+    <input type="text" id="message"/>
+    <input value="Send" onclick="sendMessage();" type="button">
+    </hr>
+</div>
+
+<!--
+<table class="table" align="center" border="1" width="400" height="200">
+    <caption>Line status.</caption>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Hostname</th>
+        <th>Status</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th scope="row">1</th>
+        <td><p id="demo"></p></td>
+        <td id="status"><p id="demo1"></p></td>
+    </tr>
+    <tr>
+        <th scope="row">2</th>
+        <td><p id="demo_rez"></p></td>
+        <td id="status1"><p id="demo1_rez"></p></td>
+    </tr>
+    <tr>
+        <th scope="row">3</th>
+        <td></td>
+        <td></td>
+    </tr>
+    </tbody>
+</table>
+-->
+
+<form>
+    <div id='tcontainer'></div>
+</form>
+
+
+<script type="text/javascript">
+    /*Создаем объект WebSocket и указываем путьь для подключения.
+     Подключение произойдет сразу после создания компонента.*/
+    var webSocket = new WebSocket("ws://localhost:8080/McastLine/websocket");
+    var messages = document.getElementById("messages");
+    var message = document.getElementById("message");
+    //    обработчик события открытия соединения с сервером
+    webSocket.onopen = function (message) {
+        messages.value+="Connection create \n";
+    }
+    //    обработчик события закрытия соединения с сервером
+    webSocket.onclose = function (message) {
+        messages.value += "Connection close \n";
+    }
+    //    обработчик ошибки при работе с сокетом
+    webSocket.onerror = function (message) {
+        messages.value += "Error \n";
+    }
+    //    обработчик нажатия кнопки отправки сообщения
+    function sendMessage() {
+//        отправляем сообщения на сервер
+        webSocket.send(message.value);
+        message.value += "On server was send:> " + message.value + "\n";
+        message.value = "";
+    }
+    //  обработчик получения сообщения от сервера
+    webSocket.onmessage=function (message) {
+        // messages.value+="Message from server: " + message.data + "\n";
+
+        //var json = JSON.parse(message.data);
+
+        addTable(message);
+
+
+        /*if(json.hostname == "MSSR osn"){
+         document.getElementById('demo').innerHTML = json.hostname;
+         document.getElementById('demo1').innerHTML = json.status;
+         if(json.status == true){
+         document.getElementById('status').style.background = "green";
+         }else{
+         document.getElementById('status').style.background="red";
+         }
+         }else{
+         document.getElementById('demo_rez').innerHTML = json.hostname;
+         document.getElementById('demo1_rez').innerHTML = json.status;
+         if(json.status == true) {
+         document.getElementById('status1').style.background = "green";
+         }else{
+         document.getElementById('status1').style.background="red";
+         }
+         }*/
+    }
+</script>
+
+<script>
+    function addTable(message)
+    {
+        mytable = document.createElement('table');
+
+        mytable.setAttribute('border', '1');
+        mytable.setAttribute('id', 'mytbl');
+
+        newrow = mytable.insertRow(0);
+
+        newcell = newrow.insertCell(0);
+        newcell.innerHTML = 'Hostname';
+
+        newcell = newrow.insertCell(1);
+        newcell.innerHTML = 'Status';
+
+        newrow = mytable.insertRow(1);
+
+        /*newcell = newrow.insertCell(0);
+         newcell.innerHTML = '<input type="text" name="tcell">';
+
+         newcell = newrow.insertCell(1);
+         newcell.innerHTML = '<input type="text" name="tcell">';
+
+         newcell = newrow.insertCell(2);
+         newcell.innerHTML = '<input type="text" name="tcell">';
+         */
+        document.getElementById('tcontainer').appendChild(mytable);
+        addrow();
+    }
+</script>
+<script>
+    function addrow()
+    {
+        mytable = document.getElementById('mytbl');
+        rowcount = mytable.rows.length;
+
+        newrow = mytable.insertRow(rowcount);
+
+        newcell = newrow.insertCell(0);
+        newcell.innerHTML = '<input type="text" name="tcell">';
+
+        newcell = newrow.insertCell(1);
+        newcell.innerHTML = '<input type="text" name="tcell">';
+    }
+</script>
+
+</body>
+</html>
